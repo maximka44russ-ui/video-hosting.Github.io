@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ video.title }}</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <header>
+        <h1>🎓 Обучающий видеохостинг</h1>
+        <nav>
+            <a href="/">Главная</a>
+            {% if user %}
+                <span>{{ user.username }}</span>
+                <a href="/api/logout">Выйти</a>
+            {% else %}
+                <a href="/login">Вход</a>
+            {% endif %}
+        </nav>
+    </header>
+
+    <main class="video-page">
+        <div class="video-container">
+            <iframe width="800" height="450" src="https://www.youtube.com/embed/{{ video.url.split('=')[-1] }}" frameborder="0" allowfullscreen></iframe>
+            <h2>{{ video.title }}</h2>
+            <p>{{ video.description }}</p>
+            
+            <div class="video-stats">
+                <span>👁 {{ video.views }} просмотров</span>
+                <form action="/api/like/{{ video.id }}" method="post" style="display:inline;">
+                    <button type="submit">👍 {{ video.likes }}</button>
+                </form>
+                <form action="/api/dislike/{{ video.id }}" method="post" style="display:inline;">
+                    <button type="submit">👎 {{ video.dislikes }}</button>
+                </form>
+            </div>
+
+            <div class="comments-section">
+                <h3>Комментарии</h3>
+                
+                {% if user %}
+                <form action="/api/comment/{{ video.id }}" method="post">
+                    <textarea name="content" placeholder="Напишите комментарий..." required></textarea>
+                    <button type="submit">Отправить</button>
+                </form>
+                {% else %}
+                <p><a href="/login">Войдите</a>, чтобы оставить комментарий.</p>
+                {% endif %}
+
+                <div class="comments-list">
+                    {% for comment in comments %}
+                    <div class="comment">
+                        <strong>{{ comment.username }}</strong>
+                        <p>{{ comment.content }}</p>
+                        <small>{{ comment.created_at }}</small>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="complaint-section">
+                {% if user %}
+                <details>
+                    <summary>Пожаловаться на видео</summary>
+                    <form action="/api/complaint/{{ video.id }}" method="post">
+                        <input type="text" name="reason" placeholder="Причина жалобы" required>
+                        <button type="submit">Отправить жалобу</button>
+                    </form>
+                </details>
+                {% endif %}
+            </div>
+        </div>
+    </main>
+</body>
+</html>
